@@ -12,10 +12,10 @@ uses
 
 type
   TFrmPrincipal = class(TForm)
-    BitBtn1: TBitBtn;
+    BtnExecutarTeste: TBitBtn;
     tbPessoa: TFDMemTable;
     tbPessoaNOME: TStringField;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure BtnExecutarTesteClick(Sender: TObject);
   private
     { Private declarations }
     procedure LoadDataSetPessoa;
@@ -30,7 +30,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TFrmPrincipal.BitBtn1Click(Sender: TObject);
+procedure TFrmPrincipal.BtnExecutarTesteClick(Sender: TObject);
 var
   _ListaPessoa: TGenericsPrincipalListaEntityPessoa;
   _Pessoa: TGenericsPrincipalEntityPessoa;
