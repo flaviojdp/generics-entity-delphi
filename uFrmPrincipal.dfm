@@ -36,5 +36,8 @@ object FrmPrincipal: TFrmPrincipal
       FieldName = 'NOME'
       Size = 150
     end
+    object tbPessoaDATA_NASCIMENTO: TDateField
+      FieldName = 'DATA_NASCIMENTO'
+    end
   end
 end
