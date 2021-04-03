@@ -13,14 +13,14 @@ object FrmPrincipal: TFrmPrincipal
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object BitBtn1: TBitBtn
-    Left = 152
-    Top = 48
-    Width = 75
+  object BtnExecutarTeste: TBitBtn
+    Left = 320
+    Top = 16
+    Width = 107
     Height = 25
-    Caption = 'BitBtn1'
+    Caption = 'Executar Teste'
     TabOrder = 0
-    OnClick = BitBtn1Click
+    OnClick = BtnExecutarTesteClick
   end
   object tbPessoa: TFDMemTable
     FetchOptions.AssignedValues = [evMode]
