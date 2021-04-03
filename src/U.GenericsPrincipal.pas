@@ -5,6 +5,7 @@ interface
 uses
   Vcl.Dialogs,
   Data.DB,
+  System.Character,
   System.Generics.Collections;
 
 type
@@ -12,6 +13,9 @@ type
   TGenericsPrincipalEntityBase<TChave> = class
   strict protected
     procedure HydrateObject(const ctDataSet: TDataSet);
+    function TemMaiusCula(const csTexto: String): Boolean;
+    function TrataCamelCase(const csTexto: String):String;
+    function TrataNomePropriedade(const csTexto: String):String;
   public
     function GetChave: TChave; virtual; abstract;
     procedure LoadFromDataSet(const ctDataSet: TDataSet); virtual;
@@ -28,10 +32,12 @@ type
   strict private
   private
     FNome: String;
+    FDataNascimento: TDate;
   public
     function GetChave: string; override;
     // procedure LoadFromDataSet(const ctDataSet: TDataSet); override;
     property Nome: String read FNome write FNome;
+    property DataNascimento: TDate read FDataNascimento write FDataNascimento;
   end;
 
   TGenericsPrincipalListaEntityPessoa = class(TGenericsPrincipalListaEntityBase<string, TGenericsPrincipalEntityPessoa>)
@@ -99,6 +105,7 @@ var
   _Contexto: TRttiContext;
   _Tipo: TRttiType;
   _Propriedade: TRttiProperty;
+  _NomeField: string;
 begin
   _Contexto := TRttiContext.Create;
   _Tipo := _Contexto.GetType(Self.ClassType);
@@ -106,15 +113,68 @@ begin
   begin
     if not _Propriedade.IsWritable then
       continue;
-    if ctDataSet.FindField(_Propriedade.Name) = nil then
+    _NomeField := TrataNomePropriedade(_Propriedade.Name);
+    if ctDataSet.FindField(_NomeField) = nil then
       continue;
-    _Propriedade.SetValue(Self, TValue.FromVariant(ctDataSet.FieldByName(_Propriedade.Name).Value));
+    _Propriedade.SetValue(Self, TValue.FromVariant(ctDataSet.FieldByName(_NomeField).Value));
   end;
 end;
 
 procedure TGenericsPrincipalEntityBase<TChave>.LoadFromDataSet(const ctDataSet: TDataSet);
 begin
   Self.HydrateObject(ctDataSet);
+end;
+
+function TGenericsPrincipalEntityBase<TChave>.TemMaiusCula(
+  const csTexto: String): Boolean;
+var
+  _Char: Char;
+  _Idx: Integer;
+begin
+  _Idx := -1;
+  Result := False;
+  for _Char in  csTexto do
+  begin
+    Inc(_Idx);
+    if _Idx = 0 then
+      Continue;
+
+    if _Char.IsUpper then
+      Exit(True)
+  end;
+end;
+
+function TGenericsPrincipalEntityBase<TChave>.TrataCamelCase(
+  const csTexto: String): String;
+var
+  _Char: Char;
+  _Idx: Integer;
+begin
+  _Idx := -1;
+  Result := '';
+  if csTexto.Trim.Length > 0 then
+    Result := csTexto[1];
+  for _Char in  csTexto do
+  begin
+    Inc(_Idx);
+    if _Idx = 0 then
+      Continue;
+
+    if _Char.IsUpper then
+    begin
+      Result := Result + '_';
+//      ShowMessage('Maiuscula!' + _Char);
+    end;
+    Result := Result + _Char;
+  end;
+end;
+
+function TGenericsPrincipalEntityBase<TChave>.TrataNomePropriedade(
+  const csTexto: String): String;
+begin
+  Result := csTexto.Trim.ToUpper;
+    if Self.TemMaiuscula(csTexto) then
+      Result := TrataCamelCase(csTexto).Trim.ToUpper;
 end;
 
 end.

@@ -15,10 +15,12 @@ type
     BtnExecutarTeste: TBitBtn;
     tbPessoa: TFDMemTable;
     tbPessoaNOME: TStringField;
+    tbPessoaDATA_NASCIMENTO: TDateField;
     procedure BtnExecutarTesteClick(Sender: TObject);
   private
     { Private declarations }
     procedure LoadDataSetPessoa;
+    procedure InserPessoa(const csNome: String; const ctDataNascimento: TDate);
   public
     { Public declarations }
   end;
@@ -46,28 +48,30 @@ begin
   ShowMessage(_ListaPessoa.Count.ToString);
 
   for _Pessoa in _ListaPessoa.Values do
-    ShowMessage(_Pessoa.Nome);
+    ShowMessage(Format('Nome: %s Data Nascimento: %s',[_Pessoa.Nome, DateToStr(_Pessoa.DataNascimento)]));
+end;
+
+procedure TFrmPrincipal.InserPessoa(const csNome: String;
+  const ctDataNascimento: TDate);
+begin
+  if not tbPessoa.Active then
+    tbPessoa.Open;
+  tbPessoa.Insert;
+  tbPessoa.FieldByName('NOME').AsString := csNome;
+  tbPessoa.FieldByName('DATA_NASCIMENTO').AsDateTime := ctDataNascimento;
+  tbPessoa.Post;
 end;
 
 procedure TFrmPrincipal.LoadDataSetPessoa;
 begin
   if not tbPessoa.Active then
     tbPessoa.Open;
-  tbPessoa.Insert;
-  tbPessoa.FieldByName('NOME').AsString := 'João';
-  tbPessoa.Post;
+  tbPessoa.EmptyDataSet;
 
-  tbPessoa.Insert;
-  tbPessoa.FieldByName('NOME').AsString := 'Maria';
-  tbPessoa.Post;
-
-  tbPessoa.Insert;
-  tbPessoa.FieldByName('NOME').AsString := 'José';
-  tbPessoa.Post;
-
-  tbPessoa.Insert;
-  tbPessoa.FieldByName('NOME').AsString := 'Antonio';
-  tbPessoa.Post;
+  Self.InserPessoa('João', StrToDate('15/05/2000'));
+  Self.InserPessoa('Maria', StrToDate('23/07/2010'));
+  Self.InserPessoa('José', StrToDate('30/06/2012'));
+  Self.InserPessoa('Antônio', StrToDate('27/08/2013'));
 end;
 
 end.
