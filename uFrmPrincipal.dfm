@@ -22,6 +22,15 @@ object FrmPrincipal: TFrmPrincipal
     TabOrder = 0
     OnClick = BtnExecutarTesteClick
   end
+  object BtnExecutarTesteRecord: TBitBtn
+    Left = 320
+    Top = 48
+    Width = 107
+    Height = 25
+    Caption = 'Teste Record'
+    TabOrder = 1
+    OnClick = BtnExecutarTesteRecordClick
+  end
   object tbPessoa: TFDMemTable
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
@@ -38,6 +47,26 @@ object FrmPrincipal: TFrmPrincipal
     end
     object tbPessoaDATA_NASCIMENTO: TDateField
       FieldName = 'DATA_NASCIMENTO'
+    end
+  end
+  object tbProduto: TFDMemTable
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 296
+    Top = 104
+    object tbProdutoTipo: TStringField
+      FieldName = 'Tipo'
+    end
+    object tbProdutoCodigo: TIntegerField
+      FieldName = 'Codigo'
+    end
+    object tbProdutoNome: TStringField
+      FieldName = 'Nome'
     end
   end
 end

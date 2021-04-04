@@ -6,16 +6,22 @@ uses
   Vcl.Dialogs,
   Data.DB,
   System.Character,
-  System.Generics.Collections;
+  System.Generics.Collections, System.Generics.Defaults;
 
 type
+
+  TChaveProduto = record
+    Tipo: string;
+    Codigo: Integer;
+    class operator Equal(A: TChaveProduto; B: TChaveProduto): Boolean;
+  end;
 
   TGenericsPrincipalEntityBase<TChave> = class
   strict protected
     procedure HydrateObject(const ctDataSet: TDataSet);
     function TemMaiusCula(const csTexto: String): Boolean;
-    function TrataCamelCase(const csTexto: String):String;
-    function TrataNomePropriedade(const csTexto: String):String;
+    function TrataCamelCase(const csTexto: String): String;
+    function TrataNomePropriedade(const csTexto: String): String;
   public
     function GetChave: TChave; virtual; abstract;
     procedure LoadFromDataSet(const ctDataSet: TDataSet); virtual;
@@ -41,6 +47,24 @@ type
   end;
 
   TGenericsPrincipalListaEntityPessoa = class(TGenericsPrincipalListaEntityBase<string, TGenericsPrincipalEntityPessoa>)
+  end;
+
+  TEntityProduto = class(TGenericsPrincipalEntityBase<TChaveProduto>)
+  strict private
+    FTipo: String;
+    FCodigo: Integer;
+    FNome: String;
+  private
+  public
+    function GetChave: TChaveProduto; override;
+    property Tipo: String read FTipo write FTipo;
+    property Codigo: Integer read FCodigo write FCodigo;
+    property Nome: String read FNome write FNome;
+  end;
+
+  TListaEntityProduto = class(TGenericsPrincipalListaEntityBase<TChaveProduto, TEntityProduto>)
+  public
+    constructor Create(const AComparer: IEqualityComparer<TChaveProduto> = nil);
   end;
 
 implementation
@@ -125,27 +149,25 @@ begin
   Self.HydrateObject(ctDataSet);
 end;
 
-function TGenericsPrincipalEntityBase<TChave>.TemMaiusCula(
-  const csTexto: String): Boolean;
+function TGenericsPrincipalEntityBase<TChave>.TemMaiusCula(const csTexto: String): Boolean;
 var
   _Char: Char;
   _Idx: Integer;
 begin
   _Idx := -1;
   Result := False;
-  for _Char in  csTexto do
+  for _Char in csTexto do
   begin
     Inc(_Idx);
     if _Idx = 0 then
-      Continue;
+      continue;
 
     if _Char.IsUpper then
       Exit(True)
   end;
 end;
 
-function TGenericsPrincipalEntityBase<TChave>.TrataCamelCase(
-  const csTexto: String): String;
+function TGenericsPrincipalEntityBase<TChave>.TrataCamelCase(const csTexto: String): String;
 var
   _Char: Char;
   _Idx: Integer;
@@ -154,27 +176,68 @@ begin
   Result := '';
   if csTexto.Trim.Length > 0 then
     Result := csTexto[1];
-  for _Char in  csTexto do
+  for _Char in csTexto do
   begin
     Inc(_Idx);
     if _Idx = 0 then
-      Continue;
+      continue;
 
     if _Char.IsUpper then
     begin
       Result := Result + '_';
-//      ShowMessage('Maiuscula!' + _Char);
+      // ShowMessage('Maiuscula!' + _Char);
     end;
     Result := Result + _Char;
   end;
 end;
 
-function TGenericsPrincipalEntityBase<TChave>.TrataNomePropriedade(
-  const csTexto: String): String;
+function TGenericsPrincipalEntityBase<TChave>.TrataNomePropriedade(const csTexto: String): String;
 begin
   Result := csTexto.Trim.ToUpper;
-    if Self.TemMaiuscula(csTexto) then
-      Result := TrataCamelCase(csTexto).Trim.ToUpper;
+  if Self.TemMaiusCula(csTexto) then
+    Result := TrataCamelCase(csTexto).Trim.ToUpper;
+end;
+
+{ TGenericsPrincipalEntityProduto }
+
+function TEntityProduto.GetChave: TChaveProduto;
+begin
+  Result.Tipo := Tipo;
+  Result.Codigo := Codigo;
+end;
+
+{ TChaveProduto }
+
+{ TChaveProduto }
+
+class operator TChaveProduto.Equal(A, B: TChaveProduto): Boolean;
+begin
+  Result := A.Codigo = B.Codigo
+end;
+
+{ TListaEntityProduto }
+
+constructor TListaEntityProduto.Create( const AComparer: IEqualityComparer<TChaveProduto>);
+var
+  _Comparer: IEqualityComparer<TChaveProduto>;
+begin
+  _Comparer := AComparer;
+  if(_Comparer = nil)then
+  begin
+    _Comparer := TDelegatedEqualityComparer<TChaveProduto>.Create(
+      function(const Left, Right: TChaveProduto): Boolean
+      begin
+        Result := Left = Right;
+      end,
+      function(const Value: TChaveProduto): Integer
+      begin
+        Result := Value.Codigo
+      end
+    );
+  end;
+
+  inherited Create(_Comparer);
+
 end;
 
 end.
