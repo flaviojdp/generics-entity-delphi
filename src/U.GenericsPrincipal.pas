@@ -67,9 +67,40 @@ type
     constructor Create(const AComparer: IEqualityComparer<TChaveProduto> = nil);
   end;
 
+  TChaveNota = class(TInterfacedObject, IEqualityComparer<TChaveNota>)
+  strict private
+    FNumero: Integer;
+    FSerie: string;
+  private
+  public
+    function Equals(const Left, Right: TChaveNota): Boolean; reintroduce;
+    function GetHashCode(const Value: TChaveNota): Integer; reintroduce;
+    property Numero: Integer read FNumero write FNumero;
+    property Serie: string read FSerie write FSerie;
+  end;
+
+  TNota = class(TGenericsPrincipalEntityBase<TChaveNota>)
+  strict private
+    FNumero: Integer;
+    FCnpj: String;
+    FSerie: string;
+  private
+  public
+    function GetChave: TChaveNota; override;
+    property Cnpj: String read FCnpj write FCnpj;
+    property Numero: Integer read FNumero write FNumero;
+    property Serie: string read FSerie write FSerie;
+  end;
+
+  TListaNota = class(TGenericsPrincipalListaEntityBase<TChaveNota,TNota>)
+  public
+    constructor Create;
+  end;
+
 implementation
 
 uses
+  System.Hash,
   System.Rtti,
   System.SysUtils;
 
@@ -208,8 +239,6 @@ end;
 
 { TChaveProduto }
 
-{ TChaveProduto }
-
 class operator TChaveProduto.Equal(A, B: TChaveProduto): Boolean;
 begin
   Result := A.Codigo = B.Codigo
@@ -217,12 +246,12 @@ end;
 
 { TListaEntityProduto }
 
-constructor TListaEntityProduto.Create( const AComparer: IEqualityComparer<TChaveProduto>);
+constructor TListaEntityProduto.Create(const AComparer: IEqualityComparer<TChaveProduto>);
 var
   _Comparer: IEqualityComparer<TChaveProduto>;
 begin
   _Comparer := AComparer;
-  if(_Comparer = nil)then
+  if (_Comparer = nil) then
   begin
     _Comparer := TDelegatedEqualityComparer<TChaveProduto>.Create(
       function(const Left, Right: TChaveProduto): Boolean
@@ -232,12 +261,40 @@ begin
       function(const Value: TChaveProduto): Integer
       begin
         Result := Value.Codigo
-      end
-    );
+      end);
   end;
 
   inherited Create(_Comparer);
 
+end;
+
+{ TChaveNota }
+
+function TChaveNota.Equals(const Left, Right: TChaveNota): Boolean;
+begin
+  Result := (Left.Numero = Right.Numero) and (Left.Serie.Equals(Right.Serie))
+end;
+
+function TChaveNota.GetHashCode(const Value: TChaveNota): Integer;
+begin
+  Result := THashBobJenkins.GetHashValue(Value.Serie, Value.Serie.Trim.Length, 0);
+  Result := THashBobJenkins.GetHashValue(Value.Numero, Value.Numero.ToString.Length, Result);
+end;
+
+{ TNota }
+
+function TNota.GetChave: TChaveNota;
+begin
+  Result := TChaveNota.Create;
+  Result.Serie := Serie;
+  Result.Numero := Numero;
+end;
+
+{ TListaNota }
+
+constructor TListaNota.Create;
+begin
+  inherited Create(TChaveNota.Create)
 end;
 
 end.

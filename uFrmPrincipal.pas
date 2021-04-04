@@ -21,15 +21,24 @@ type
     tbProdutoTipo: TStringField;
     tbProdutoCodigo: TIntegerField;
     tbProdutoNome: TStringField;
+    tbNota: TFDMemTable;
+    tbNotaNUMERO: TIntegerField;
+    tbNotaSERIE: TStringField;
+    tbNotaCNPJ: TStringField;
+    BtnTestarNota: TBitBtn;
     procedure BtnExecutarTesteClick(Sender: TObject);
     procedure BtnExecutarTesteRecordClick(Sender: TObject);
+    procedure BtnTestarNotaClick(Sender: TObject);
   private
     { Private declarations }
     procedure LoadDataSetPessoa;
-    procedure MockDataSetProduto;
-    procedure InserPessoa(const csNome: String; const ctDataNascimento: TDate);
     procedure InserirProduto(const csTipo: String; const ciCodigo: Integer; const csNome: String);
+    procedure InserirNota(const csSerie: String; const ciNumero: Integer; const csCnpj: String);
+    procedure InserirPessoa(const csNome: String; const ctDataNascimento: TDate);
+    procedure MockDataSetNota;
+    procedure MockDataSetProduto;
     procedure TestarRecord;
+    procedure TestarNota;
 
   public
     { Public declarations }
@@ -66,6 +75,23 @@ begin
   TestarRecord;
 end;
 
+procedure TFrmPrincipal.BtnTestarNotaClick(Sender: TObject);
+begin
+  TestarNota;
+end;
+
+procedure TFrmPrincipal.InserirNota(const csSerie: String;
+  const ciNumero: Integer; const csCnpj: String);
+begin
+  if not tbNota.Active then
+    tbNota.Open;
+  tbNota.Insert;
+  tbNota.FieldByName('SERIE').AsString := csSerie;
+  tbNota.FieldByName('NUMERO').AsInteger := ciNumero;
+  tbNota.FieldByName('CNPJ').AsString := csCnpj;
+  tbNota.Post;
+end;
+
 procedure TFrmPrincipal.InserirProduto(const csTipo: String; const ciCodigo: Integer; const csNome: String);
 begin
   if not tbProduto.Active then
@@ -77,7 +103,7 @@ begin
   tbProduto.Post;
 end;
 
-procedure TFrmPrincipal.InserPessoa(const csNome: String; const ctDataNascimento: TDate);
+procedure TFrmPrincipal.InserirPessoa(const csNome: String; const ctDataNascimento: TDate);
 begin
   if not tbPessoa.Active then
     tbPessoa.Open;
@@ -93,10 +119,17 @@ begin
     tbPessoa.Open;
   tbPessoa.EmptyDataSet;
 
-  Self.InserPessoa('João', StrToDate('15/05/2000'));
-  Self.InserPessoa('Maria', StrToDate('23/07/2010'));
-  Self.InserPessoa('José', StrToDate('30/06/2012'));
-  Self.InserPessoa('Antônio', StrToDate('27/08/2013'));
+  Self.InserirPessoa('João', StrToDate('15/05/2000'));
+  Self.InserirPessoa('Maria', StrToDate('23/07/2010'));
+  Self.InserirPessoa('José', StrToDate('30/06/2012'));
+  Self.InserirPessoa('Antônio', StrToDate('27/08/2013'));
+end;
+
+procedure TFrmPrincipal.MockDataSetNota;
+begin
+  InserirNota('A',1,'1');
+  InserirNota('B',2,'2');
+  InserirNota('C',3,'3');
 end;
 
 procedure TFrmPrincipal.MockDataSetProduto;
@@ -109,12 +142,30 @@ begin
   InserirProduto('Perecivel', 2, 'Feijão');
 end;
 
+procedure TFrmPrincipal.TestarNota;
+var
+  _ChaveNota: TChaveNota;
+  _ListaNota: TListaNota;
+begin
+  MockDataSetNota;
+  _ListaNota := TListaNota.Create;
+  _ListaNota.LoadAll(tbNota);
+  _ChaveNota := TChaveNota.Create;
+  _ChaveNota.Serie := 'B';
+  _ChaveNota.Numero := 2;
+  if _ListaNota.ContainsKey(_ChaveNota) then
+    ShowMessage('Achei Nota')
+  else
+    ShowMessage('Não encontrei a nota!!!');
+end;
+
 procedure TFrmPrincipal.TestarRecord;
 var
   _Produto: TEntityProduto;
   _ListaProduto: TListaEntityProduto;
   _ChaveProduto: TChaveProduto;
 begin
+  _Produto := nil;
   MockDataSetProduto;
   _ListaProduto := TListaEntityProduto.Create(nil);
   try

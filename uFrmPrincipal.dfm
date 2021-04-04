@@ -31,6 +31,15 @@ object FrmPrincipal: TFrmPrincipal
     TabOrder = 1
     OnClick = BtnExecutarTesteRecordClick
   end
+  object BtnTestarNota: TBitBtn
+    Left = 320
+    Top = 79
+    Width = 107
+    Height = 25
+    Caption = 'BtnTestarNota'
+    TabOrder = 2
+    OnClick = BtnTestarNotaClick
+  end
   object tbPessoa: TFDMemTable
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
@@ -67,6 +76,27 @@ object FrmPrincipal: TFrmPrincipal
     end
     object tbProdutoNome: TStringField
       FieldName = 'Nome'
+    end
+  end
+  object tbNota: TFDMemTable
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 32
+    Top = 112
+    object tbNotaNUMERO: TIntegerField
+      FieldName = 'NUMERO'
+    end
+    object tbNotaSERIE: TStringField
+      FieldName = 'SERIE'
+    end
+    object tbNotaCNPJ: TStringField
+      FieldName = 'CNPJ'
+      Size = 14
     end
   end
 end
